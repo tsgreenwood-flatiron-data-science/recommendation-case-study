@@ -123,3 +123,21 @@ def get_cold_start_rating(user_id, movie_id, user_df, u_clusters, ratings_df):
         pred_rating = avg
     
     return pred_rating
+
+def get_recommendation_for_user(uder_id):
+    
+    import json
+    with open("data/predictions.json", "r") as r:
+    data = []
+    for i in r:
+        data.append(json.loads(i)) 
+    
+    recommendation_list = []
+    
+    for i in data:
+        if i['user_id'] == uder_id:
+            recommendation_list.append({'movie_id': i['movie_id'], 'rating': i['prediction']})
+    print(recommendation_list)
+
+    sorted_list = sorted(recommendation_list, key=lambda k: k['rating'], reverse=True) 
+    return sorted_list[:10]
