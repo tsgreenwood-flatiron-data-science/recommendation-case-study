@@ -1,8 +1,10 @@
+from __future__ import division
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.cluster import KMeans
 import pyspark
+
 
 def ohe_columns(series, name):
     ohe = OneHotEncoder(categories='auto')
@@ -107,7 +109,11 @@ def get_cold_start_rating(user_id, movie_id):
     user_cluster = u_clusters.loc[u_clusters['id'] == user_id]['cluster'].tolist()[0]
     
     # Get score components
-    avg = ratings_df.loc[(ratings_df['cluster'] == user_cluster) & (ratings_df['movie_id'] == movie_id)]['rating'].tolist()[0]
+    if movie_id in ratings_df['movie_id'].tolist():
+        avg = ratings_df.loc[(ratings_df['cluster'] == user_cluster) & (ratings_df['movie_id'] == movie_id)]['rating'].tolist()[0]
+    else:
+        cluster_rating = ratings_df.loc[ratings_df['cluster'] == user_cluster]['rating'].tolist()
+        avg = sum(cluster_rating)/len(cluster_rating)
     if user_id in user_df['user_id'].tolist():
         u = user_bias(user_df, user_id)
         i = item_bias(user_df, movie_id)
