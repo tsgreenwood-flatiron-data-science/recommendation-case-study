@@ -98,20 +98,21 @@ def get_cold_start_rating(user_id, movie_id):
     -------
     movie rating (float)
     """
-    # Get user df with clusters 
-    user_df = pd.read_csv('data/user_cluster.csv', index_col=0)  
- 
-    # Get ratings data, with clusters
+    # Load files 
+    user_df = pd.read_csv('data/user_cluster.csv', index_col=0) 
+    u_clusters = pd.read_csv('data/u_info.csv', index_col=0)
     ratings_df = pd.read_csv('data/movie_cluster_avg.csv', index_col=0)
     
     # User Cluster
-    user_cluster = user_df.loc[user_df['user_id'] == user_id]['cluster'].tolist()[0]
+    user_cluster = u_clusters.loc[u_clusters['id'] == user_id]['cluster'].tolist()[0]
     
     # Get score components
-    avg = ratings_df.loc[ratings_df['movie_id'] == movie_id]['rating'].tolist()[0]
-    u = user_bias(user_df, user_id)
-    i = item_bias(user_df, movie_id)
-    
-    pred_rating = avg + u + i
+    avg = ratings_df.loc[(ratings_df['cluster'] == user_cluster) & (ratings_df['movie_id'] == movie_id)]['rating'].tolist()[0]
+    if user_id in user_df['user_id'].tolist():
+        u = user_bias(user_df, user_id)
+        i = item_bias(user_df, movie_id)
+        pred_rating = avg + u + i
+    else:
+        pred_rating = avg
     
     return pred_rating
