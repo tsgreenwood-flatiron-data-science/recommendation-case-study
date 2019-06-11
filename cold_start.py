@@ -88,7 +88,7 @@ def item_bias(df, movie_id):
     return  df.loc[df['movie_id'] == movie_id, 'rating'].mean() - df['rating'].mean()
 
 
-def get_cold_start_rating(user_id, movie_id):
+def get_cold_start_rating(user_id, movie_id, user_df, u_clusters, ratings_df):
     """
     Given user_id and movie_id, return a predicted rating
     
@@ -101,15 +101,16 @@ def get_cold_start_rating(user_id, movie_id):
     movie rating (float)
     """
     # Load files 
-    user_df = pd.read_csv('data/user_cluster.csv', index_col=0) 
-    u_clusters = pd.read_csv('data/u_info.csv', index_col=0)
-    ratings_df = pd.read_csv('data/movie_cluster_avg.csv', index_col=0)
+    #user_df = pd.read_csv('data/user_cluster.csv', index_col=0) 
+    #u_clusters = pd.read_csv('data/u_info.csv', index_col=0)
+    #ratings_df = pd.read_csv('data/movie_cluster_avg.csv', index_col=0)
     
     # User Cluster
     user_cluster = u_clusters.loc[u_clusters['id'] == user_id]['cluster'].tolist()[0]
     
     # Get score components
-    if movie_id in ratings_df['movie_id'].tolist():
+    if len(ratings_df.loc[(ratings_df['cluster'] == user_cluster) & (ratings_df['movie_id'] == movie_id)]) > 0:
+#    if (movie_id in ratings_df['movie_id'].tolist()):
         avg = ratings_df.loc[(ratings_df['cluster'] == user_cluster) & (ratings_df['movie_id'] == movie_id)]['rating'].tolist()
     else:
         cluster_rating = ratings_df.loc[ratings_df['cluster'] == user_cluster]['rating'].tolist()
